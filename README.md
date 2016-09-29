@@ -52,3 +52,15 @@ HWND GetMainHWND()
 	return sErrorCode == 0 ? (HWND)eb.fParam1 : NULL;
 }
 ```
+
+This plugin is to illustrate how the new entry point can be used to manipulate the MDI window on v16.
+
+###Note
+
+In previous versions, it was possible to bring the current application to the front, using some code like this:
+
+```
+LAUNCH EXTERNAL PROCESS("cmd.exe /C \""+Application file\"")
+```
+
+Since v16, this will simply launch a new instance of 4D, as is expective of a modern Windows application. This plugin may serve as a workaround for such demands.
