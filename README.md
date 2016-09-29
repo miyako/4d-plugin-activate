@@ -45,7 +45,7 @@ do{
 
 A new entry point has been added (``719``) in v16, which will return the ``HWND`` of the MDI window.
 
-```
+```c
 HWND GetMainHWND()
 {
 	EngineBlock eb;
