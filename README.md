@@ -70,3 +70,5 @@ LAUNCH EXTERNAL PROCESS("cmd.exe /C \""+Application file\"")
 Since v16, this will simply launch a new instance of 4D, as is expective of a modern Windows application. This plugin may serve as a workaround for such demands.
 
 Following [SetForegroundWindow](https://msdn.microsoft.com/en-us/library/windows/desktop/ms633539(v=vs.85).aspx) recommendations, the plugin does **not** attempt to steal the foreground status from the current foreground application.
+
+See also (console-activate-4d)[https://github.com/miyako/console-activate-4d]
