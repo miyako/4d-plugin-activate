@@ -1,13 +1,13 @@
 # 4d-plugin-activate
 Move current application to front.
 
-##Platform
+###Platform
 
 | carbon | cocoa | win32 | win64 |
 |:------:|:-----:|:---------:|:---------:|
 |🆗|🆗|🆗|🆗|
 
-#About
+###Introduction
 
 4D v16 is the very first non-Altura (Mac2Win) release for the Windows platform. In particular, some core modules have been re-written (or replaced, for memory management) to be Altura free:
 
