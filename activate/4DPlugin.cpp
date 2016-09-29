@@ -19,8 +19,11 @@ HWND gmdi = NULL;
 void activateWindow(HWND window)
 {
 	ShowWindowAsync(window, SW_RESTORE);
-	SetWindowPos(window, HWND_TOPMOST, 0, 0, 0, 0,  SWP_NOMOVE | SWP_NOSIZE);
+	//ShowWindow(window, SW_RESTORE);
+	SetWindowPos(window, HWND_TOP, 0, 0, 0, 0,  SWP_NOMOVE | SWP_NOSIZE);
+	//SetActiveWindow(window);
 	SetForegroundWindow(window);
+	AllowSetForegroundWindow(ASFW_ANY);
 }
 
 HWND getMainWindow()
