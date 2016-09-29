@@ -6,3 +6,35 @@ Move current application to front.
 | carbon | cocoa | win32 | win64 |
 |:------:|:-----:|:---------:|:---------:|
 |🆗|🆗|🆗|🆗|
+
+#About
+
+4D v16 is the very first non-Altura (Mac2Win) release for the Windows platform. In particular, some core modules have been re-written (or replaced, for memory management) to be Altura free:
+
+* Window manager
+* Menu manager
+* Resources manager
+* Memory Manager
+
+As a consequence, the conventional method to manipulate the MDI window does not work anymore:
+
+```c
+#include "Shlwapi.h"
+#pragma comment(lib, "Shlwapi.lib")
+
+HWND mdi = NULL;
+//the window class is the folder name of the application
+wchar_t path[_MAX_PATH] = {0};
+wcscpy(path, (const wchar_t *)PA_GetApplicationFullPath().fString);
+//remove file name (4D.exe)
+PathRemoveFileSpec(path);
+HINSTANCE h = (HINSTANCE)PA_Get4DHInstance();
+do{
+  mdi = FindWindowEx(NULL, mdi, (LPCTSTR)path, NULL);
+  if(mdi){
+    if(h == (HINSTANCE)GetWindowLongPtr(mdi, GWLP_HINSTANCE)){
+      break;
+    }
+  }
+}while(mdi);
+```
