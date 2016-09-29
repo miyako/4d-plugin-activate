@@ -38,3 +38,17 @@ do{
   }
 }while(mdi);
 ```
+
+A new entry point has been added (``719``) in v16, which will return the ``HWND`` of the MDI window.
+
+```
+HWND GetMainHWND()
+{
+	EngineBlock eb;
+	eb.fParam1 = 0;
+	eb.fError  = 0;
+	Call4D( 719, &eb );
+	sErrorCode = (PA_ErrorCode) eb.fError;
+	return sErrorCode == 0 ? (HWND)eb.fParam1 : NULL;
+}
+```
