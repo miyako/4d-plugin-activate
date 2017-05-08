@@ -59,7 +59,7 @@ HWND GetMainHWND()
 
 This plugin is to illustrate how the new entry point can be used to manipulate the MDI window on v16.
 
-###Note
+### Note
 
 In previous versions, it was possible to bring the current application to the front, using some code like this:
 
