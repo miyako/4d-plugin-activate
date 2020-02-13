@@ -1,1 +1,1 @@
-﻿/* Localized versions of Info.plist keys */CFBundleName = "Activate";CFBundleShortVersionString = "1.0";CFBundleGetInfoString = "Activate version 1.0, Copyright 2016 miyako.";
+/* Localized versions of Info.plist keys */CFBundleName = "activate";CFBundleShortVersionString = "2.0";CFBundleGetInfoString = "activate version 2.0, Copyright 2020 miyako.";
