@@ -1,3 +1,8 @@
 ﻿{
-	"forms": {}
+	"forms": {
+		"TEST": {
+			"timeStamp": "2020-03-05T03:31:34.940Z",
+			"destination": "detailScreen"
+		}
+	}
 }

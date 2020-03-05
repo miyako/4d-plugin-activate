@@ -1,7 +1,7 @@
 ﻿{
 	"Sources/DatabaseMethods/onStartup.4dm": {
-		"left": 322,
-		"top": 651,
+		"left": 243,
+		"top": 223,
 		"width": 1138,
 		"height": 642
 	},
@@ -144,8 +144,8 @@
 		"height": 762
 	},
 	"Sources/Methods/TEST.4dm": {
-		"left": 450,
-		"top": 188,
+		"left": -37,
+		"top": 358,
 		"width": 877,
 		"height": 637
 	},
@@ -160,5 +160,17 @@
 		"top": 140,
 		"width": 1129,
 		"height": 787
+	},
+	"Sources/Forms/TEST/ObjectMethods/Button.4dm": {
+		"left": 101,
+		"top": 368,
+		"width": 877,
+		"height": 637
+	},
+	"Sources/Forms/TEST/method.4dm": {
+		"left": 116,
+		"top": 359,
+		"width": 877,
+		"height": 637
 	}
 }

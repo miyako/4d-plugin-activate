@@ -8,7 +8,7 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			P2zIy8vHWWKEPMs1ZHS53ZIv+4c=
+			24p3cEJuzXKkhF8ZDB/k2zKR1Yk=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -35,11 +35,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			P2zIy8vHWWKEPMs1ZHS53ZIv+4c=
+			24p3cEJuzXKkhF8ZDB/k2zKR1Yk=
 			</data>
 			<key>hash2</key>
 			<data>
-			WHCd9F+sPolMUVgr1Xm+lTMzTu8w6j+HbWy40Kn1FN4=
+			+cuHGWStiJ9dKEiDfgGLunLchuFvJUwDWVU2fWnETSs=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -59,29 +59,128 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			hL9gqzB1pAgChKZ1uj+Jqt43yxs=
+			bzSw95pMyJFoct37OeKONXgDyIg=
 			</data>
 			<key>hash2</key>
 			<data>
-			ZCCEqtPmUM+2iJDxTvuZrd5mchV7dH5Z4RZvNF7YQT0=
+			O+IkDLD8UIxcXh7xLRok46qUJ1IGbXKQWTVx+bxUTMo=
+			</data>
+		</dict>
+		<key>Windows/activate.exp</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			87rWMo7fxZv+MVe8TfFS+wrBPng=
+			</data>
+			<key>hash2</key>
+			<data>
+			lqZRGDe4iFk1yYyV187X/NzGDJWe0BTCMAohR4NnlG0=
+			</data>
+		</dict>
+		<key>Windows/activate.iobj</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			eh2d/4KnTGydh55C4Hx9MrFCZ34=
+			</data>
+			<key>hash2</key>
+			<data>
+			aEQcwzuuy/vey9VoWt6YJVcCUiCmqjHlDqCu5QdoIcg=
+			</data>
+		</dict>
+		<key>Windows/activate.ipdb</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			fDwOgesWPORJpYx24hnjp6LmIlU=
+			</data>
+			<key>hash2</key>
+			<data>
+			H4EWCWUKtVFdlOAcQH2fzJ/uZqHJIzVCtT+WDMI6u1M=
+			</data>
+		</dict>
+		<key>Windows/activate.lib</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			CmDhaGOrTII/v8Nw/Hj1795JkNA=
+			</data>
+			<key>hash2</key>
+			<data>
+			hKpizsSydhYBBEStayqnJBy6mRNW089zVkPd+hJ3WaY=
 			</data>
 		</dict>
 		<key>Windows64/activate.4DX</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			zvoZ7ULt+O/aKx6NzgaqTillGNg=
+			MBJZi6vNzqmTQyHNwzq5AAMQyOs=
 			</data>
 			<key>hash2</key>
 			<data>
-			xZ0isPdvytfz/ISMhvmTet0RKxwRCg6HeDepN7N2icI=
+			flFTREZknEsKDVBR0DvgbJ0qDdok/xm0a4Mxqy/F81I=
+			</data>
+		</dict>
+		<key>Windows64/activate.exp</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			ipPO3KMtDrSYW8EQsup7qXZyKpg=
+			</data>
+			<key>hash2</key>
+			<data>
+			2ECSmu29eZzIu3F7uMDbFvISOQsbofY3o2zENbIWXfY=
+			</data>
+		</dict>
+		<key>Windows64/activate.iobj</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			F/y0RLTtE3AzkUgs5K0rv+Jfrdo=
+			</data>
+			<key>hash2</key>
+			<data>
+			+kXLetq8S4vDlt/LXVsWyQ+90WAs1ocx1WdaQVnqCaI=
+			</data>
+		</dict>
+		<key>Windows64/activate.ipdb</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			XNSrT31AHWXzeCYF2I5N9v3RW3k=
+			</data>
+			<key>hash2</key>
+			<data>
+			bKU7GoFSP8H7SrPP/EKGS0rayDBUf+lmGtwu7stlX5k=
+			</data>
+		</dict>
+		<key>Windows64/activate.lib</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			X56TSZdvGpJikYbpEz0f1RSJSvE=
+			</data>
+			<key>hash2</key>
+			<data>
+			ILwW77ZT8u00rO9fuAvhmy2909crXt1Aacax+SBlEio=
+			</data>
+		</dict>
+		<key>Windows64/activate.pdb</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			Il6rwq64/YbMAiP7Z1wLmoEmibE=
+			</data>
+			<key>hash2</key>
+			<data>
+			haJrD3gPXO7Ze2eR/+0zeUludJ6ClJSMuQRLO9CFs5w=
 			</data>
 		</dict>
 		<key>manifest.json</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			iX2ZfmzbgHAsYAInjXVQ3Xlfyhc=
+			E4ZHD2qGiZ3Mpmx7SjaeAwRgdCI=
 			</data>
 			<key>requirement</key>
 			<string>identifier manifest and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = Y69CWUC25B</string>

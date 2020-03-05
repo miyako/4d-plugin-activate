@@ -10,76 +10,6 @@
 
 #include "4DPlugin-activate.h"
 
-#if VERSIONWIN
-namespace MDI {
-    HWND windowRef = NULL;
-}
-#endif
-
-#if VERSIONMAC
-#include <Cocoa/Cocoa.h>
-#endif
-
-void OnStartup() {
-    
-#if VERSIONWIN
-    PA_ulong32 version = PA_Get4DVersion();
-    
-    if (version >= 16)
-    {
-        MDI::windowRef = (HWND)PA_GetMainWindowHWND();
-    }
-    else
-    {
-        //the window class is the folder name of the application
-        HWND mdi = NULL;
-        wchar_t path[_MAX_PATH] = { 0 };
-        wchar_t * applicationPath = wcscpy(path, (const wchar_t *)PA_GetApplicationFullPath().fString);
-        //remove file name (4D.exe)
-        PathRemoveFileSpec(path);
-        //check instance as well, to be sure
-        HINSTANCE h = (HINSTANCE)PA_Get4DHInstance();
-        do {
-            mdi = FindWindowEx(NULL, mdi, (LPCTSTR)path, NULL);
-            if (mdi)
-            {
-                if (h == (HINSTANCE)GetWindowLongPtr(mdi, GWLP_HINSTANCE))
-                {
-                    break;
-                }
-            }
-        } while (mdi);
-        MDI::windowRef = mdi;
-    }
-#endif
-}
-
-void OnExit() {
-    
-#if VERSIONWIN
-    if (MDI::windowRef)
-    {
-        wchar_t path[_MAX_PATH] = { 0 };
-        wchar_t * applicationPath = wcscpy(path, (const wchar_t *)PA_GetApplicationFullPath().fString);
-        
-        SHFILEINFO fileinfo;
-        if (SHGetFileInfo((LPCTSTR)applicationPath,
-                          0,
-                          &fileinfo,
-                          sizeof(fileinfo),
-                          SHGFI_LARGEICON | SHGFI_ICON))
-        {
-            HICON hIcon = fileinfo.hIcon;
-            SendMessage(MDI::windowRef, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-            /* "you are responsible for freeing it with DestroyIcon when you no longer need it" */
-            /* https://docs.microsoft.com/ja-jp/windows/desktop/api/shellapi/nf-shellapi-shgetfileinfoa */
-            DestroyIcon(hIcon);
-        }
-        
-    }
-#endif
-}
-
 #pragma mark -
 
 void PluginMain(PA_long32 selector, PA_PluginParameters params) {
@@ -88,15 +18,7 @@ void PluginMain(PA_long32 selector, PA_PluginParameters params) {
     {
         switch(selector)
         {
-            case kInitPlugin :
-            case kServerInitPlugin :
-                OnStartup();
-                break;
-                
-            case kDeinitPlugin:
-                OnExit();
-                break;
-                
+        
                 // --- activate
                 
             case 1 :
@@ -115,17 +37,22 @@ void PluginMain(PA_long32 selector, PA_PluginParameters params) {
 #pragma mark -
 
 #if VERSIONWIN
-
-HWND gmdi = NULL;
-
-void activateWindow(HWND window)
-{
-    ShowWindowAsync(window, SW_RESTORE);
-    //ShowWindow(window, SW_RESTORE);
-    SetWindowPos(window, HWND_TOP, 0, 0, 0, 0,  SWP_NOMOVE | SWP_NOSIZE);
-    //SetActiveWindow(window);
-    SetForegroundWindow(window);
-    AllowSetForegroundWindow(ASFW_ANY);
+void activate_window(HWND m_hWnd) {
+	/*
+	https://stackoverflow.com/questions/916259/win32-bring-a-window-to-top
+	*/
+	HWND hCurWnd = ::GetForegroundWindow();
+	DWORD dwMyID = ::GetCurrentThreadId();
+	DWORD dwCurID = ::GetWindowThreadProcessId(hCurWnd, NULL);
+	::AttachThreadInput(dwCurID, dwMyID, TRUE);
+	//::ShowWindowAsync(m_hWnd, SW_RESTORE);
+	::ShowWindow(m_hWnd, SW_RESTORE);
+	::SetWindowPos(m_hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	::SetWindowPos(m_hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE);
+	::SetForegroundWindow(m_hWnd);
+	::SetFocus(m_hWnd);
+	::SetActiveWindow(m_hWnd);
+	::AttachThreadInput(dwCurID, dwMyID, FALSE);
 }
 #endif
 
@@ -136,6 +63,41 @@ void ACTIVATE_4D(PA_PluginParameters params) {
 #endif
     
 #if VERSIONWIN
-    activateWindow(MDI:windowRef);
+    
+	PA_Variable args[5];
+
+	args[0] = PA_CreateVariable(eVK_Longint);
+	args[1] = PA_CreateVariable(eVK_Longint);
+	args[2] = PA_CreateVariable(eVK_Longint);
+	args[3] = PA_CreateVariable(eVK_Longint);
+	args[4] = PA_CreateVariable(eVK_Longint);
+	PA_SetLongintVariable(&args[4], (PA_long32)-1);
+
+	PA_ExecuteCommandByID(443 /*GET WINDOW RECT*/, args, 5);
+
+	bool isSDI = (PA_GetLongintVariable(args[0]) == 0) 
+		&& (PA_GetLongintVariable(args[1]) == 0)
+		&& (PA_GetLongintVariable(args[2]) == 0)
+		&& (PA_GetLongintVariable(args[3]) == 0);
+
+	if(!isSDI) {
+		PA_RunInMainProcess((PA_RunInMainProcessProcPtr)activate_window, (HWND)PA_GetMainWindowHWND());
+	}
+
+	PA_long32 arg1 = PA_GetLongParameter(params, 1);
+
+	if (arg1 == 0) {
+		args[4] = PA_ExecuteCommandByID(827 /*Current form window*/, args, 0);
+		arg1 = PA_GetLongintVariable(args[4]);
+	}
+
+	PA_WindowRef l = (PA_WindowRef)arg1;
+
+	if (l) {
+		sLONG_PTR w = PA_GetHWND(l);
+		if (w) {
+			PA_RunInMainProcess((PA_RunInMainProcessProcPtr)activate_window, (HWND)w);
+		}
+	}
 #endif
 }

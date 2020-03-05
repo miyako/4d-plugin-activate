@@ -4,7 +4,7 @@
     "commands": [
         {
             "theme": "Activate",
-            "syntax": "ACTIVATE 4D",
+            "syntax": "ACTIVATE 4D(&L)",
             "threadSafe": true
         }
     ]

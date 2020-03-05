@@ -2,11 +2,16 @@
 	"editors": [
 		{
 			"type": "method",
-			"id": 2147483642,
+			"id": 2147483637,
 			"codeDescriptor": {
-				"type": 1,
-				"methodName": "generate_project"
+				"type": 5,
+				"databaseMethod": 1
 			}
+		},
+		{
+			"type": "form",
+			"id": 1,
+			"formName": "TEST"
 		}
 	]
 }
