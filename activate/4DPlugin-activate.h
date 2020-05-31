@@ -18,7 +18,8 @@
 #endif
 
 #if VERSIONWIN
-#include "windows.h"
+#include "shlwapi.h"
+#pragma comment(lib, "shlwapi.lib")
 #endif
 
 #pragma mark -

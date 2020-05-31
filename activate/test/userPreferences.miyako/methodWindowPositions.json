@@ -144,10 +144,10 @@
 		"height": 762
 	},
 	"Sources/Methods/TEST.4dm": {
-		"left": -37,
-		"top": 358,
+		"left": -144,
+		"top": 176,
 		"width": 877,
-		"height": 637
+		"height": 587
 	},
 	"Sources/Methods/TEST_v17.4dm": {
 		"left": 450,
@@ -162,14 +162,14 @@
 		"height": 787
 	},
 	"Sources/Forms/TEST/ObjectMethods/Button.4dm": {
-		"left": 101,
-		"top": 368,
+		"left": -271,
+		"top": 389,
 		"width": 877,
 		"height": 637
 	},
 	"Sources/Forms/TEST/method.4dm": {
-		"left": 116,
-		"top": 359,
+		"left": -3,
+		"top": 378,
 		"width": 877,
 		"height": 637
 	}

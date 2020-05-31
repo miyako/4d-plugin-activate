@@ -12,13 +12,82 @@
 
 #pragma mark -
 
+static bool wasMDI;
+
+static bool isSDI() {
+    
+#if VERSIONWIN
+    
+    PA_Variable args[5];
+
+    args[0] = PA_CreateVariable(eVK_Longint);
+    args[1] = PA_CreateVariable(eVK_Longint);
+    args[2] = PA_CreateVariable(eVK_Longint);
+    args[3] = PA_CreateVariable(eVK_Longint);
+    args[4] = PA_CreateVariable(eVK_Longint);
+    
+    PA_SetLongintVariable(&args[4], (PA_long32)-1);
+
+    PA_ExecuteCommandByID(443 /*GET WINDOW RECT*/, args, 5);
+
+    return (
+       (PA_GetLongintVariable(args[0]) == 0)
+    && (PA_GetLongintVariable(args[1]) == 0)
+    && (PA_GetLongintVariable(args[2]) == 0)
+    && (PA_GetLongintVariable(args[3]) == 0));
+    
+    /* the variable belongs to 4D, no need to PA_ClearVariable (I think) */
+
+#endif
+    
+    return false;
+}
+
+#if VERSIONWIN
+
+static HWND getMDI() {
+    
+    wasMDI = true;
+
+    PA_ulong32 version = PA_Get4DVersion();
+    
+    if (version >= 16)
+        return (HWND)PA_GetMainWindowHWND();
+
+    // Altura MAc2Win does not allow multiple instances of the same app
+    // we can assume that the window class is the folder name of the application
+    
+    HWND mdi = NULL;
+    wchar_t path[_MAX_PATH] = { 0 };
+    wchar_t * applicationPath = wcscpy(path, (const wchar_t *)PA_GetApplicationFullPath().fString);
+    
+    //remove file name (4D.exe)
+    PathRemoveFileSpec(path);
+    //check instance as well, to be sure
+    HINSTANCE h = (HINSTANCE)PA_Get4DHInstance();
+    
+    do {
+        mdi = FindWindowEx(NULL, mdi, (LPCTSTR)path, NULL);
+        if (mdi)
+        {
+            if (h == (HINSTANCE)GetWindowLongPtr(mdi, GWLP_HINSTANCE))
+            {
+                break;
+            }
+        }
+    } while (mdi);
+    
+   return mdi;
+}
+
+#endif
+
 void PluginMain(PA_long32 selector, PA_PluginParameters params) {
     
     try
     {
         switch(selector)
-        {
-        
+        {                
                 // --- activate
                 
             case 1 :
@@ -64,40 +133,20 @@ void ACTIVATE_4D(PA_PluginParameters params) {
     
 #if VERSIONWIN
     
-	PA_Variable args[5];
-
-	args[0] = PA_CreateVariable(eVK_Longint);
-	args[1] = PA_CreateVariable(eVK_Longint);
-	args[2] = PA_CreateVariable(eVK_Longint);
-	args[3] = PA_CreateVariable(eVK_Longint);
-	args[4] = PA_CreateVariable(eVK_Longint);
-	PA_SetLongintVariable(&args[4], (PA_long32)-1);
-
-	PA_ExecuteCommandByID(443 /*GET WINDOW RECT*/, args, 5);
-
-	bool isSDI = (PA_GetLongintVariable(args[0]) == 0) 
-		&& (PA_GetLongintVariable(args[1]) == 0)
-		&& (PA_GetLongintVariable(args[2]) == 0)
-		&& (PA_GetLongintVariable(args[3]) == 0);
-
-	if(!isSDI) {
-		PA_RunInMainProcess((PA_RunInMainProcessProcPtr)activate_window, (HWND)PA_GetMainWindowHWND());
-	}
-
-	PA_long32 arg1 = PA_GetLongParameter(params, 1);
-
-	if (arg1 == 0) {
-		args[4] = PA_ExecuteCommandByID(827 /*Current form window*/, args, 0);
-		arg1 = PA_GetLongintVariable(args[4]);
-	}
-
-	PA_WindowRef l = (PA_WindowRef)arg1;
-
-	if (l) {
-		sLONG_PTR w = PA_GetHWND(l);
-		if (w) {
-			PA_RunInMainProcess((PA_RunInMainProcessProcPtr)activate_window, (HWND)w);
-		}
-	}
+    HWND mdi = getMDI();
+    
+    if (mdi) {
+        PA_RunInMainProcess((PA_RunInMainProcessProcPtr)activate_window, mdi);
+    }else{
+        
+        PA_WindowRef windowRef = reinterpret_cast<PA_WindowRef>(PA_GetLongParameter(params, 1));
+        
+        HWND window = reinterpret_cast<HWND>(PA_GetHWND(windowRef));
+        
+        if (window) {
+            PA_RunInMainProcess((PA_RunInMainProcessProcPtr)activate_window, window);
+        }
+        
+    }
 #endif
 }

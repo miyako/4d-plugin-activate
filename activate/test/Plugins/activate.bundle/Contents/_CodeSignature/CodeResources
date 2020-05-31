@@ -8,7 +8,7 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			24p3cEJuzXKkhF8ZDB/k2zKR1Yk=
+			Lx4L+JcCdYaWVvyvw0bWuayjHU4=
 			</data>
 			<key>optional</key>
 			<true/>
@@ -22,10 +22,6 @@
 	<dict>
 		<key>QuickLook/Thumbnail.png</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			hC+U8EqvyIRM1lLakHLfvl4V9Tc=
-			</data>
 			<key>hash2</key>
 			<data>
 			nGfrvibB5KlzvZgF4Bra+l0HpRloxismgTLePnOwCdk=
@@ -33,23 +29,15 @@
 		</dict>
 		<key>Resources/English.lproj/InfoPlist.strings</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			24p3cEJuzXKkhF8ZDB/k2zKR1Yk=
-			</data>
 			<key>hash2</key>
 			<data>
-			+cuHGWStiJ9dKEiDfgGLunLchuFvJUwDWVU2fWnETSs=
+			mJQJpvfQUMSWgoOsxs7FnO2gy9bOucdedaMLzeDKXwE=
 			</data>
 			<key>optional</key>
 			<true/>
 		</dict>
 		<key>Resources/constants.xlf</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			naGs0SDB1lvznm3q9DGO5wLJDvM=
-			</data>
 			<key>hash2</key>
 			<data>
 			Y/bU4++uaKesBu8/8FOHlzDOIKc4x6rpYj+AzywwFkE=
@@ -57,123 +45,16 @@
 		</dict>
 		<key>Windows/activate.4DX</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			bzSw95pMyJFoct37OeKONXgDyIg=
-			</data>
 			<key>hash2</key>
 			<data>
-			O+IkDLD8UIxcXh7xLRok46qUJ1IGbXKQWTVx+bxUTMo=
-			</data>
-		</dict>
-		<key>Windows/activate.exp</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			87rWMo7fxZv+MVe8TfFS+wrBPng=
-			</data>
-			<key>hash2</key>
-			<data>
-			lqZRGDe4iFk1yYyV187X/NzGDJWe0BTCMAohR4NnlG0=
-			</data>
-		</dict>
-		<key>Windows/activate.iobj</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			eh2d/4KnTGydh55C4Hx9MrFCZ34=
-			</data>
-			<key>hash2</key>
-			<data>
-			aEQcwzuuy/vey9VoWt6YJVcCUiCmqjHlDqCu5QdoIcg=
-			</data>
-		</dict>
-		<key>Windows/activate.ipdb</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			fDwOgesWPORJpYx24hnjp6LmIlU=
-			</data>
-			<key>hash2</key>
-			<data>
-			H4EWCWUKtVFdlOAcQH2fzJ/uZqHJIzVCtT+WDMI6u1M=
-			</data>
-		</dict>
-		<key>Windows/activate.lib</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			CmDhaGOrTII/v8Nw/Hj1795JkNA=
-			</data>
-			<key>hash2</key>
-			<data>
-			hKpizsSydhYBBEStayqnJBy6mRNW089zVkPd+hJ3WaY=
+			X+I+tXOKuQp4Z0hZ2LaoT8DqxqDj5l2YE0u8l4tlZ3c=
 			</data>
 		</dict>
 		<key>Windows64/activate.4DX</key>
 		<dict>
-			<key>hash</key>
-			<data>
-			MBJZi6vNzqmTQyHNwzq5AAMQyOs=
-			</data>
 			<key>hash2</key>
 			<data>
-			flFTREZknEsKDVBR0DvgbJ0qDdok/xm0a4Mxqy/F81I=
-			</data>
-		</dict>
-		<key>Windows64/activate.exp</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			ipPO3KMtDrSYW8EQsup7qXZyKpg=
-			</data>
-			<key>hash2</key>
-			<data>
-			2ECSmu29eZzIu3F7uMDbFvISOQsbofY3o2zENbIWXfY=
-			</data>
-		</dict>
-		<key>Windows64/activate.iobj</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			F/y0RLTtE3AzkUgs5K0rv+Jfrdo=
-			</data>
-			<key>hash2</key>
-			<data>
-			+kXLetq8S4vDlt/LXVsWyQ+90WAs1ocx1WdaQVnqCaI=
-			</data>
-		</dict>
-		<key>Windows64/activate.ipdb</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			XNSrT31AHWXzeCYF2I5N9v3RW3k=
-			</data>
-			<key>hash2</key>
-			<data>
-			bKU7GoFSP8H7SrPP/EKGS0rayDBUf+lmGtwu7stlX5k=
-			</data>
-		</dict>
-		<key>Windows64/activate.lib</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			X56TSZdvGpJikYbpEz0f1RSJSvE=
-			</data>
-			<key>hash2</key>
-			<data>
-			ILwW77ZT8u00rO9fuAvhmy2909crXt1Aacax+SBlEio=
-			</data>
-		</dict>
-		<key>Windows64/activate.pdb</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			Il6rwq64/YbMAiP7Z1wLmoEmibE=
-			</data>
-			<key>hash2</key>
-			<data>
-			haJrD3gPXO7Ze2eR/+0zeUludJ6ClJSMuQRLO9CFs5w=
+			7j6j3op7NvfWYA8BiF/8kpRqGQxN4ShlGNxIp6QYIFw=
 			</data>
 		</dict>
 		<key>manifest.json</key>

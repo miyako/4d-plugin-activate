@@ -13,7 +13,7 @@
 	"bottomMargin": 20,
 	"events": [
 		"onLoad",
-		"onCloseBox"
+		"onUnload"
 	],
 	"windowTitle": "window title",
 	"destination": "detailScreen",
@@ -23,17 +23,13 @@
 		},
 		{
 			"objects": {
-				"Button": {
-					"type": "button",
-					"text": "Button",
-					"top": 88,
-					"left": 93,
-					"width": 127,
-					"height": 176,
-					"events": [
-						"onClick"
-					],
-					"method": "ObjectMethods/Button.4dm"
+				"Text": {
+					"type": "text",
+					"text": "text default",
+					"top": 61,
+					"left": 54,
+					"width": 293,
+					"height": 90
 				}
 			}
 		}
