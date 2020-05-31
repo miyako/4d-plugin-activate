@@ -11,7 +11,13 @@ Move current application to front.
 
 <img width="32" height="32" src="https://user-images.githubusercontent.com/1725068/73986501-15964580-4981-11ea-9ac1-73c5cee50aae.png"> <img src="https://user-images.githubusercontent.com/1725068/73987971-db2ea780-4984-11ea-8ada-e25fb9c3cf4e.png" width="32" height="32" />
 
-## Introduction
+### Feature
+
+On Mac, the app is activated (``NSRunningApplication activateWithOptions:``)
+
+On Windows, the MDI window (if applicable) is restored and activated, followed by the window passed in ``$1``. If ``$1`` is omitted, ``Current form window`` is restored and activated.
+
+### Discussion (reference)
 
 4D v16 is the very first non-Altura (Mac2Win) release for the Windows platform. In particular, some core modules have been re-written (or replaced, for memory management) to be Altura free:
 
@@ -59,8 +65,6 @@ HWND GetMainHWND()
 
 This plugin is to illustrate how the new entry point can be used to manipulate the MDI window on v16.
 
-## Notes
-
 In previous versions, it was possible to bring the current application to the front, using some code like this:
 
 ```
@@ -69,6 +73,6 @@ LAUNCH EXTERNAL PROCESS("cmd.exe /C \""+Application file\"")
 
 Since v16, this will simply launch a new instance of 4D, as is expective of a modern Windows application. This plugin may serve as a workaround for such demands.
 
-Following [SetForegroundWindow](https://msdn.microsoft.com/en-us/library/windows/desktop/ms633539(v=vs.85).aspx) recommendations, the plugin does **not** attempt to steal the foreground status from the current foreground application.
+~~Following [SetForegroundWindow](https://msdn.microsoft.com/en-us/library/windows/desktop/ms633539(v=vs.85).aspx) recommendations, the plugin does **not** attempt to steal the foreground status from the current foreground application.~~
 
 See also [console-activate-4d](https://github.com/miyako/console-activate-4d)
