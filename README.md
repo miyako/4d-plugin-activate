@@ -15,7 +15,9 @@ Move current application to front.
 
 On Mac, the app is activated (``NSRunningApplication activateWithOptions:``)
 
-On Windows, the MDI window (if applicable) is restored and activated, followed by the window passed in ``$1``. If ``$1`` is omitted, ``Current form window`` is restored and activated.
+On Windows MDI mode, the MDI window is restored and activated. ``$1`` is ignored. After that, you would want to ``BRING TO FRONT`` the ``Current process``.
+
+On Windows SDI mode, pass a window reference in ``$1``.
 
 ### Discussion (reference)
 
