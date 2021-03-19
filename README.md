@@ -1,7 +1,7 @@
-[version](https://img.shields.io/badge/version-18%2B-EB8E5F)
+![version](https://img.shields.io/badge/version-18%2B-EB8E5F)
 ![platform](https://img.shields.io/static/v1?label=platform&message=osx-intel%20|osx-arm%20|%20win-64&color=blue)
-![downloads](https://img.shields.io/github/downloads/miyako/4d-plugin-activate
-/total)
+[![license](https://img.shields.io/github/license/miyako/4d-plugin-activate)](LICENSE)
+![downloads](https://img.shields.io/github/downloads/miyako/4d-plugin-activate/total)
 
 # 4d-plugin-activate
 Move current application to front.
