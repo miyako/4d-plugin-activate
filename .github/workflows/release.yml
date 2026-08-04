@@ -25,6 +25,11 @@ env:
   # ---- edit these per-project, everything else is generic ----
   PRODUCT_NAME: Activate
   XCODE_PROJECT: Activate.xcodeproj
+  # The actual PBXNativeTarget name in project.pbxproj — `xcodebuild -target`
+  # matches this case-sensitively, and it does NOT have to match PRODUCT_NAME
+  # (which drives artifact/zip/dmg naming below). Check project.pbxproj's
+  # own `name = ...;` under PBXNativeTarget if this project's target is renamed.
+  XCODE_TARGET: activate
   VCX_SOLUTION: Activate.sln
   MACOS_DEPLOYMENT_TARGET: '10.13'
   # --------------------------------------------------------------
@@ -125,7 +130,7 @@ jobs:
       - name: build macOS plugin (universal)
         run: |
           xcodebuild -project "${{ env.XCODE_PROJECT }}" \
-            -target "${{ env.PRODUCT_NAME }}" \
+            -target "${{ env.XCODE_TARGET }}" \
             -configuration Default \
             ARCHS="arm64 x86_64" \
             ONLY_ACTIVE_ARCH=NO \
