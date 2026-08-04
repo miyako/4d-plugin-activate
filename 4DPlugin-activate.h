@@ -19,6 +19,7 @@
 
 #if VERSIONWIN
 #include "shlwapi.h"
+#include <errno.h>
 #pragma comment(lib, "shlwapi.lib")
 #endif
 

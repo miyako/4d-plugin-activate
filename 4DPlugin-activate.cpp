@@ -59,7 +59,15 @@ static HWND getMDI() {
     
     HWND mdi = NULL;
     wchar_t path[_MAX_PATH] = { 0 };
-    wchar_t * applicationPath = wcscpy(path, (const wchar_t *)PA_GetApplicationFullPath().fString);
+    const wchar_t * applicationPath = (const wchar_t *)PA_GetApplicationFullPath().fString;
+
+    // bounds-checked copy: wcscpy has no length limit and would overflow
+    // the fixed-size stack buffer if the path is >= _MAX_PATH wide chars
+    // (e.g. long install paths / long-path-enabled systems)
+    errno_t err = wcsncpy_s(path, _MAX_PATH, applicationPath, _TRUNCATE);
+    if (err != 0 && err != STRUNCATE) {
+        return NULL; // could not safely obtain the application path
+    }
     
     //remove file name (4D.exe)
     PathRemoveFileSpec(path);
