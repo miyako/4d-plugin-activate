@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
                BuildableName = "activate.bundle"
-               BlueprintName = "activate"
+               BlueprintName = "Activate"
                ReferencedContainer = "container:Activate.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -52,7 +52,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D01CCC60486CAD60068D4B7"
             BuildableName = "activate.bundle"
-            BlueprintName = "activate"
+            BlueprintName = "Activate"
             ReferencedContainer = "container:Activate.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

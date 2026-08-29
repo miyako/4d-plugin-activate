@@ -158,9 +158,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		8D01CCC60486CAD60068D4B7 /* activate */ = {
+		8D01CCC60486CAD60068D4B7 /* Activate */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 42D60B3F0A9DDBC8002ABB42 /* Build configuration list for PBXNativeTarget "activate" */;
+			buildConfigurationList = 42D60B3F0A9DDBC8002ABB42 /* Build configuration list for PBXNativeTarget "Activate" */;
 			buildPhases = (
 				8D01CCC70486CAD60068D4B7 /* Headers */,
 				8D01CCC90486CAD60068D4B7 /* Resources */,
@@ -174,7 +174,7 @@
 			);
 			dependencies = (
 			);
-			name = activate;
+			name = Activate;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = activate;
 			productReference = 189286350695AD8900B05D6E /* activate.bundle */;
@@ -209,7 +209,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8D01CCC60486CAD60068D4B7 /* activate */,
+				8D01CCC60486CAD60068D4B7 /* Activate */,
 			);
 		};
 /* End PBXProject section */
@@ -574,7 +574,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		42D60B3F0A9DDBC8002ABB42 /* Build configuration list for PBXNativeTarget "activate" */ = {
+		42D60B3F0A9DDBC8002ABB42 /* Build configuration list for PBXNativeTarget "Activate" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				42D60B400A9DDBC8002ABB42 /* Development */,
