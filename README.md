@@ -16,6 +16,12 @@ Activate brings the 4D application, or a specific 4D window, to the foreground. 
 
 **Platforms:** macOS, Windows
 
+## Building and releasing
+
+[Manual workflow guide](.github/README.md): **Bump version** updates source only;
+**Build** independently publishes the immutable selected ref with no custom
+inputs. Neither workflow automatically triggers the other.
+
 ---
 
 ## Requirements & platform notes
