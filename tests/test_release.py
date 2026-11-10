@@ -235,7 +235,9 @@ class PublicationCLITests(GitFixture):
         for path in self.protected:
             target = self.local / path
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(b"ignored-source.cpp\nbuild/*\n" if path == ".gitignore" else b"protected")
+            target.write_bytes(
+                b"ignored-source.cpp\nbuild/*\ntest/Plugins/XCBuildData/*\n"
+                if path == ".gitignore" else b"protected")
         self.generated = tuple(str(path) for path in native.FILES)
         for path in (*self.generated, str(native.WINDOWS)):
             target = self.local / path
@@ -457,12 +459,13 @@ runpy.run_path(sys.argv[0], run_name="__main__")
                 plistlib.loads((self.local / source.PLIST).read_bytes()), fmt=plistlib.FMT_BINARY),
             self.generated[2]: source.text(self.local / source.LOCALIZED).encode("utf-16"),
             self.generated[-1]: b"fresh signature bytes",
-            "build/XCBuildData/build.db": b"fresh Xcode build database",
-            "build/XCBuildData/build.db-wal": b"fresh Xcode write-ahead log",
-            "build/XCBuildData/build.db-shm": b"fresh Xcode shared memory",
-            "build/XCBuildData/0123456789abcdef0123456789abcdef.xcbuilddata/build-request.json":
+            "test/Plugins/XCBuildData/build.db": b"fresh Xcode build database",
+            "test/Plugins/XCBuildData/build.db-wal": b"fresh Xcode write-ahead log",
+            "test/Plugins/XCBuildData/build.db-shm": b"fresh Xcode shared memory",
+            "test/Plugins/XCBuildData/0123456789abcdef0123456789abcdef.xcbuilddata/build-request.json":
                 b"fresh Xcode request",
-            "build/Activate.build/Default/Activate.build/build.db": b"fresh intermediate",
+            "test/Plugins/Activate.build/Default/Activate.build/Objects-normal/arm64/4DPlugin-activate.o":
+                b"fresh intermediate",
             str(native.WINDOWS): b"fresh-windows",
             "winbuild/activate.4DX": b"fresh-windows",
         }
@@ -506,7 +509,7 @@ runpy.run_path(sys.argv[0], run_name="__main__")
     def test_actual_cli_ignored_xcode_database_retained_without_relaxing_source_guards(self):
         self.assertEqual(self.command("preflight").returncode, 0)
         self.reset_api()
-        relative = "build/XCBuildData/build.db"
+        relative = "test/Plugins/XCBuildData/build.db"
         database = self.local / relative
         database.parent.mkdir(parents=True)
         database.write_bytes(b"stale initial database")
@@ -516,9 +519,13 @@ runpy.run_path(sys.argv[0], run_name="__main__")
         database.unlink()
 
         expected = self.build()
-        for path in ("build/unexpected-source.cpp", "build/XCBuildData/unexpected-source.cpp",
-                     "build/XCBuildData/build.db-evil",
-                     "build/XCBuildData/evil.xcbuilddata/build-request.json"):
+        for path in ("build/unexpected-source.cpp", "test/Plugins/XCBuildData/unexpected-source.cpp",
+                     "test/Plugins/XCBuildData/build.db-evil",
+                     "test/Plugins/XCBuildData/evil.xcbuilddata/build-request.json",
+                     "build/XCBuildData/build.db", "build/XCBuildData/build.db-wal",
+                     "build/XCBuildData/build.db-shm",
+                     "build/XCBuildData/0123456789abcdef0123456789abcdef.xcbuilddata/build-request.json",
+                     "build/Activate.build/Default/Activate.build/Objects-normal/arm64/main.o"):
             unexpected = self.local / path
             unexpected.parent.mkdir(parents=True, exist_ok=True)
             unexpected.write_bytes(b"ignored source is not a generated database")
@@ -565,6 +572,72 @@ runpy.run_path(sys.argv[0], run_name="__main__")
                         self.git("update-index", "--no-" + stage, "--", path)
                     target.write_bytes(self.baseline[path])
                     self.git("add", "--", path)
+
+    def test_actual_cli_hosted_product_database_and_empty_module_scopes_retained(self):
+        expected = self.build()
+        for directory in native.EMPTY_DIRECTORIES:
+            (self.local / directory).mkdir(parents=True, exist_ok=True)
+        for relative in (
+            "test/Plugins/ExplicitPrecompiledModules/unexpected.pcm",
+            "test/Plugins/SwiftExplicitPrecompiledModules/unexpected.swiftmodule",
+            "test/Plugins/EagerLinkingTBDs/Default/unexpected.tbd",
+        ):
+            target = self.local / relative
+            target.write_bytes(b"empty hosted directory is not permission for arbitrary output")
+            self.assertNotEqual(self.command("publish").returncode, 0)
+            self.assertEqual(self.calls(), [])
+            target.unlink()
+        for relative in native.EMPTY_DIRECTORIES:
+            target = self.local / relative
+            target.rmdir()
+            target.write_bytes(b"not a regular directory")
+            self.assertNotEqual(self.command("publish").returncode, 0)
+            self.assertEqual(self.calls(), [])
+            target.unlink()
+            target.mkdir()
+        self.assertIn("test/Plugins/XCBuildData/build.db", expected)
+        self.assertIn(
+            "test/Plugins/Activate.build/Default/Activate.build/Objects-normal/arm64/4DPlugin-activate.o",
+            expected,
+        )
+        result = self.command("publish")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for relative, raw in expected.items():
+            self.assertEqual((self.local / relative).read_bytes(), raw)
+        for directory in native.EMPTY_DIRECTORIES:
+            self.assertEqual(list((self.local / directory).iterdir()), [])
+
+    def test_actual_cli_output_scopes_nested_git_symlink_and_fifo_rejected_before_api(self):
+        expected = self.build()
+        scopes = (native.BUNDLE, *native.DIRECTORIES, native.XCODE_DATA, *native.EMPTY_DIRECTORIES)
+        for scope in scopes:
+            directory = self.local / scope
+            directory.mkdir(parents=True, exist_ok=True)
+            for name, kind in ((".git", "file"), (".git", "directory"),
+                               ("nested-git/.git", "file"), ("nested-git/.git", "directory"),
+                               ("nonregular", "fifo"), ("link", "symlink")):
+                target = directory / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                if kind == "file":
+                    target.write_bytes(b"gitdir: invalid")
+                elif kind == "directory":
+                    target.mkdir()
+                elif kind == "fifo":
+                    os.mkfifo(target)
+                else:
+                    target.symlink_to(self.local / native.DOWNLOAD)
+                with self.subTest(scope=scope, name=name, kind=kind):
+                    result = self.command("publish")
+                    self.assertNotEqual(result.returncode, 0, result.stdout)
+                    self.assertEqual(self.calls(), [], result.stderr)
+                if kind == "directory":
+                    target.rmdir()
+                else:
+                    target.unlink()
+        result = self.command("publish")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for relative, raw in expected.items():
+            self.assertEqual((self.local / relative).read_bytes(), raw)
 
     def test_head_source_version_wrong_repo_and_explicit_auth_fail_before_api(self):
         self.build()
@@ -632,7 +705,7 @@ runpy.run_path(sys.argv[0], run_name="__main__")
         self.assertEqual(self.calls(), [])
         target.unlink()
         target.write_bytes(fresh)
-        directory = self.local / "build/XCBuildData"
+        directory = self.local / "test/Plugins/XCBuildData"
         (directory / "external-link").symlink_to(external)
         self.assertNotEqual(self.command("publish").returncode, 0)
         self.assertEqual(self.calls(), [])
@@ -806,8 +879,8 @@ runpy.run_path(sys.argv[0], run_name="__main__")
         result = self.command("check")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.reset_api()
-        for name in ("build/XCBuildData-evil/build.db",
-                     "build/Activate.build-evil/injected",
+        for name in ("test/Plugins/XCBuildData-evil/build.db",
+                     "test/Plugins/Activate.build-evil/injected",
                      "test/Plugins/activate.bundle-evil/Contents/Info.plist",
                      "Objs/Release/main.obj", "Default/keep"):
             target = self.local / name

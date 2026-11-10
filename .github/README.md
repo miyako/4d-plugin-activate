@@ -80,15 +80,42 @@ bundle and executable remain lowercase `activate`; display/archives remain
 inactive for Default. No frameworks, project signing policy or local-build
 behavior is modernized.
 
-Cleanup deletes only exact generated leaves and proven intermediates, after
-symlink/reparse prevalidation, with fatal errors. It preserves the tracked
+Cleanup deletes only exact generated leaves and proven intermediates. Before
+the **first deletion**, every file target must be a regular file and every
+directory target/ancestor a regular directory if present. All inspected
+descendants must be regular files/directories; symlinks, reparse points, FIFOs,
+other nonregular types and nested `.git` files/directories are rejected across
+the whole cleanup plan. Validation and deletion errors are fatal; no broad
+exception swallowing or ignore-errors removal is used. It preserves the tracked
 **regular** `Contents/CodeResources`, QuickLook thumbnail, other resources and
 siblings; it does not delete entire bundles, `Default`, or lowercase `plugins`.
 Final checkout validation preserves immutable HEAD/index and nongenerated raw
 bytes, but retains genuinely built tracked outputs instead of resetting them.
-Ignored/untracked unexpected sources fail, including under XCBuildData. Only
-`build.db`, `build.db-wal`, `build.db-shm` and descendants of 32-lowercase-hex
-`.xcbuilddata` directories qualify there.
+Ignored/untracked unexpected sources fail, including under XCBuildData.
+
+The original hosted run
+[36969724789, macOS job 110721185584](https://github.com/miyako/4d-plugin-activate/actions/runs/36969724789/job/110721185584),
+at intake `0da6dbb6f409475dd0dc263d48204b58a16c5ca6`, supplies actual Default
+output evidence. In the archived safe build-step6 log, line38 confirms the
+unchanged native invocation (including both signing/output overrides); line77
+locates the description under `test/Plugins/XCBuildData/<32hex>.xcbuilddata`;
+lines604/653 identify both `OBJROOT` and `PROJECT_TEMP_ROOT` as `test/Plugins`.
+Lines95/105 and final listing lines848–962 confirm
+`test/Plugins/Activate.build/Default/...` and `test/Plugins/XCBuildData/build.db`.
+Plist/localization/resource copies appear at lines172–186, universal output at
+lines258–260, and the inactive Deployment-only gate message at line833.
+Only `test/Plugins/Activate.build/` descendants and the exact XCBuildData
+`build.db`, `build.db-wal`, `build.db-shm` or 32-lowercase-hex `.xcbuilddata`
+descendants are generated intermediate allowances. Unsupported `build/*` paths
+are **not** exempt.
+
+That listing shows `ExplicitPrecompiledModules`, `SwiftExplicitPrecompiledModules`
+and `EagerLinkingTBDs/Default` under `test/Plugins` as **empty** directories.
+Their existing paths are validated as regular nonsymlink directories, but their
+names do not grant any arbitrary-file exemption. Nested Git/type checks apply
+there too. The companion original Windows build log confirms `Objs/Release`,
+the lowercase exact `activate.4DX` OutDir, and `.exp`/`.lib` outputs. No output,
+project-signing or local-build flag was changed to obtain these paths.
 
 Unsigned validation precedes signing and does not require the signature.
 Final validation requires every packaged leaf to be nonempty, regular and

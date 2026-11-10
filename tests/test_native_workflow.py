@@ -57,10 +57,16 @@ elif tool == "xcodebuild":
             pathlib.Path("English.lproj/InfoPlist.strings").read_bytes().decode().encode("utf-16"))
         for resource in ("manifest.json", "constants.xlf"):
             shutil.copyfile(resource, contents / "Resources" / resource)
-        db = pathlib.Path("build/XCBuildData")
+        db = pathlib.Path("test/Plugins/XCBuildData")
         db.mkdir(parents=True, exist_ok=True)
         for name in ("build.db", "build.db-wal", "build.db-shm"):
             (db / name).write_bytes(b"fresh-database")
+        product = pathlib.Path("test/Plugins/Activate.build/Default/Activate.build/Objects-normal/arm64")
+        product.mkdir(parents=True, exist_ok=True)
+        (product / "4DPlugin-activate.o").write_bytes(b"fresh-object")
+        for empty in ("ExplicitPrecompiledModules", "SwiftExplicitPrecompiledModules",
+                      "EagerLinkingTBDs/Default"):
+            pathlib.Path("test/Plugins", empty).mkdir(parents=True, exist_ok=True)
 elif tool == "lipo":
     assert args == ["-archs", str(contents / "MacOS/activate")]
     print(os.environ.get("ARCHES", "arm64 x86_64"))
@@ -294,6 +300,13 @@ class WorkflowContractTests(unittest.TestCase):
             )
         })
         self.assertEqual(str(native.DOWNLOAD), "winbuild/activate.4DX")
+        self.assertEqual(native.DIRECTORIES, (Path("test/Plugins/Activate.build"),))
+        self.assertEqual(native.XCODE_DATA, Path("test/Plugins/XCBuildData"))
+        self.assertEqual(set(map(str, native.EMPTY_DIRECTORIES)), {
+            "test/Plugins/ExplicitPrecompiledModules",
+            "test/Plugins/SwiftExplicitPrecompiledModules",
+            "test/Plugins/EagerLinkingTBDs/Default",
+        })
 
     def test_exact_two_manual_workflows_immutable_checkouts_inputs_and_crossref_lock(self):
         workflows = {path.name: yaml.load(path.read_text(), Loader=yaml.BaseLoader)

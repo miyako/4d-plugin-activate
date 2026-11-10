@@ -97,7 +97,7 @@ class NativeTests(Fixture):
         with cwd(self.root), patch("shutil.rmtree", side_effect=PermissionError("denied")):
             with self.assertRaises(PermissionError):
                 native.prepare()
-        database = self.write("build/XCBuildData/build.db", b"database bytes")
+        database = self.write("test/Plugins/XCBuildData/build.db", b"database bytes")
         with cwd(self.root):
             native.prepare()
         self.assertEqual(database.read_bytes(), b"database bytes")
@@ -134,15 +134,153 @@ class NativeTests(Fixture):
         self.assertEqual((self.root / native.WINDOWS).read_bytes(), b"downloaded")
 
 
+class CleanupAtomicityTests(Fixture):
+    def setUp(self):
+        super().setUp()
+        self.case_number = 0
+
+    def bad_cleanup_case(self, platform, relative, kind):
+        self.case_number += 1
+        case = self.root / str(self.case_number)
+        case.mkdir()
+        if platform == "macos":
+            files, directories = (*native.FILES, native.WINDOWS), native.DIRECTORIES
+            scopes = (*directories, native.XCODE_DATA, *native.EMPTY_DIRECTORIES)
+            prepare = native.prepare
+        else:
+            files, directories = native.WINDOWS_FILES, native.WINDOWS_DIRECTORIES
+            scopes, prepare = directories, native.prepare_windows
+        baseline = {}
+        for path in (*files, *native.PRESERVED,
+                     *(directory / "nested/object.o" for directory in directories)):
+            raw = b"must retain before validation: " + str(path).encode()
+            target = case / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+            baseline[path] = raw
+        if platform == "macos":
+            database = native.XCODE_DATA / "build.db"
+            baseline[database] = b"database retained even on successful cleanup"
+            (case / database).parent.mkdir(parents=True, exist_ok=True)
+            (case / database).write_bytes(baseline[database])
+        for directory in scopes:
+            (case / directory).mkdir(parents=True, exist_ok=True)
+        target = case / relative
+        backup = self.root / ("backup-" + str(self.case_number))
+        existing = target.exists()
+        if existing:
+            target.rename(backup)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if kind in ("directory", "reparse-dir"):
+            target.mkdir()
+        elif kind == "symlink":
+            outside = self.write("outside-" + str(self.case_number), b"outside untouched")
+            target.symlink_to(outside)
+        elif kind == "fifo":
+            os.mkfifo(target)
+        else:
+            target.write_bytes(b"bad output or Git marker")
+        real_lstat, real_unlink, real_rmtree = Path.lstat, Path.unlink, shutil.rmtree
+        deletions = []
+
+        def lstat(path, *args, **kwargs):
+            status = real_lstat(path, *args, **kwargs)
+            if path == relative:
+                if kind.startswith("reparse"):
+                    return SimpleNamespace(st_mode=status.st_mode, st_file_attributes=0x400)
+                if kind == "socket":
+                    return SimpleNamespace(st_mode=stat.S_IFSOCK)
+            return status
+
+        def unlink(path, *args, **kwargs):
+            deletions.append(path)
+            return real_unlink(path, *args, **kwargs)
+
+        def rmtree(path, *args, **kwargs):
+            deletions.append(path)
+            return real_rmtree(path, *args, **kwargs)
+
+        with cwd(case), patch.object(Path, "lstat", lstat), \
+                patch.object(Path, "unlink", unlink), patch.object(shutil, "rmtree", rmtree):
+            with self.assertRaisesRegex(
+                ValueError, "target|ancestor|symlink|reparse|nonregular|nested Git",
+            ):
+                prepare()
+        self.assertEqual(deletions, [], "All target validation must precede the FIRST deletion")
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target)
+        else:
+            target.unlink()
+        if existing:
+            backup.rename(target)
+        for path, raw in baseline.items():
+            self.assertEqual((case / path).read_bytes(), raw, path)
+        with cwd(case):
+            prepare()
+        for path in (*files, *directories):
+            self.assertFalse((case / path).exists(), path)
+        for path in native.PRESERVED:
+            self.assertEqual((case / path).read_bytes(), baseline[path])
+        if platform == "macos":
+            self.assertEqual((case / native.XCODE_DATA / "build.db").read_bytes(),
+                             baseline[native.XCODE_DATA / "build.db"])
+
+    def test_every_macos_cleanup_file_and_directory_type_checked_before_any_deletion(self):
+        for path in (*native.FILES, native.WINDOWS):
+            for kind in ("directory", "symlink", "fifo", "reparse-file"):
+                with self.subTest(path=path, kind=kind):
+                    self.bad_cleanup_case("macos", path, kind)
+        for path in (*native.DIRECTORIES, native.XCODE_DATA, *native.EMPTY_DIRECTORIES):
+            for kind in ("file", "symlink", "fifo", "reparse-dir"):
+                with self.subTest(path=path, kind=kind):
+                    self.bad_cleanup_case("macos", path, kind)
+
+    def test_every_windows_cleanup_file_and_directory_type_checked_before_any_deletion(self):
+        for path in native.WINDOWS_FILES:
+            for kind in ("directory", "symlink", "fifo", "reparse-file"):
+                with self.subTest(path=path, kind=kind):
+                    self.bad_cleanup_case("windows", path, kind)
+        for path in native.WINDOWS_DIRECTORIES:
+            for kind in ("file", "symlink", "fifo", "reparse-dir"):
+                with self.subTest(path=path, kind=kind):
+                    self.bad_cleanup_case("windows", path, kind)
+
+    def test_late_ancestors_must_be_regular_directories_without_git_markers(self):
+        for platform, ancestor in (
+            ("macos", native.WINDOWS.parent), ("windows", Path("Objs")),
+        ):
+            for kind in ("file", "symlink", "fifo", "reparse-dir"):
+                with self.subTest(platform=platform, kind=kind):
+                    self.bad_cleanup_case(platform, ancestor, kind)
+            for marker in (".git", ".GIT"):
+                for kind in ("file", "directory"):
+                    with self.subTest(platform=platform, marker=marker, kind=kind):
+                        self.bad_cleanup_case(platform, ancestor / marker, kind)
+
+    def test_every_inspected_directory_rejects_nested_git_links_and_nonregular_descendants(self):
+        cases = (
+            ("macos", (*native.DIRECTORIES, native.XCODE_DATA, *native.EMPTY_DIRECTORIES)),
+            ("windows", native.WINDOWS_DIRECTORIES),
+        )
+        for platform, directories in cases:
+            for directory in directories:
+                for leaf, kind in (
+                    ("nested/.git", "file"), ("nested/.git", "directory"),
+                    ("nested/link", "symlink"), ("nested/fifo", "fifo"),
+                    ("nested/reparse", "reparse-file"), ("nested/socket", "socket"),
+                ):
+                    with self.subTest(platform=platform, directory=directory, leaf=leaf, kind=kind):
+                        self.bad_cleanup_case(platform, directory / leaf, kind)
+
+
 class GeneratedTests(GitFixture):
     def test_precise_final_only_generated_classifier_and_retention(self):
         accepted = (
             *native.FILES, native.WINDOWS, native.DOWNLOAD,
-            "build/XCBuildData/build.db", "build/XCBuildData/build.db-wal",
-            "build/XCBuildData/build.db-shm",
-            "build/XCBuildData/0123456789abcdef0123456789abcdef.xcbuilddata/build-request.json",
-            "build/Activate.build/Default/Activate.build/Objects-normal/arm64/main.o",
-            "test/Plugins/Activate.build/main.o",
+            "test/Plugins/XCBuildData/build.db", "test/Plugins/XCBuildData/build.db-wal",
+            "test/Plugins/XCBuildData/build.db-shm",
+            "test/Plugins/XCBuildData/0123456789abcdef0123456789abcdef.xcbuilddata/build-request.json",
+            "test/Plugins/Activate.build/Default/Activate.build/Objects-normal/arm64/main.o",
         )
         for path in accepted:
             target = self.local / path
@@ -155,10 +293,18 @@ class GeneratedTests(GitFixture):
         for path in accepted:
             self.assertEqual((self.local / path).read_bytes(), b"fresh native bytes")
         for path in (
-            "build/XCBuildData-evil/build.db", "build/XCBuildData/unexpected-source.cpp",
-            "build/XCBuildData/build.db-evil", "build/XCBuildData/evil.xcbuilddata/request",
+            "test/Plugins/XCBuildData-evil/build.db", "test/Plugins/XCBuildData/unexpected-source.cpp",
+            "test/Plugins/XCBuildData/build.db-evil",
+            "test/Plugins/XCBuildData/evil.xcbuilddata/request",
+            "build/XCBuildData/build.db", "build/XCBuildData/build.db-wal",
+            "build/XCBuildData/build.db-shm",
+            "build/XCBuildData/0123456789abcdef0123456789abcdef.xcbuilddata/build-request.json",
+            "build/Activate.build/Default/Activate.build/Objects-normal/arm64/main.o",
             "build/Activate.build-evil/main.o", "build/Default/Activate.build/main.o",
             "build/unexpected-source.cpp", "Objs/Release/main.obj",
+            "test/Plugins/ExplicitPrecompiledModules/unexpected.pcm",
+            "test/Plugins/SwiftExplicitPrecompiledModules/unexpected.swiftmodule",
+            "test/Plugins/EagerLinkingTBDs/Default/unexpected.tbd",
             "winbuild/nested/activate.4DX", "test/Plugins/Default/keep",
             "test/plugins/keep", str(native.PRESERVED[0]), str(native.PRESERVED[1]),
             str(native.CONTENTS / "Resources/custom.txt"),

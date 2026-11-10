@@ -142,8 +142,10 @@ def context(sha, *, final=False):
     repository.selected_sha(sha)
     version = source_version.read()
     if final:
-        native.validate_paths((*native.PACKAGE_FILES, native.DOWNLOAD, *native.DIRECTORIES,
-                               native.XCODE_DATA, *map(Path, asset_names(version))))
+        native.validate_targets((*native.PACKAGE_FILES, native.DOWNLOAD,
+                                 *map(Path, asset_names(version))),
+                                (native.BUNDLE, *native.DIRECTORIES, native.XCODE_DATA,
+                                 *native.EMPTY_DIRECTORIES))
     repository.verify_checkout(sha, generated=native.generated,
                                assets=asset_names(version), final=final)
     if final:

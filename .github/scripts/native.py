@@ -6,7 +6,6 @@ import re
 import shutil
 import stat
 
-from repository import is_link
 import source_version
 
 
@@ -23,8 +22,13 @@ WINDOWS = CONTENTS / "Windows64/activate.4DX"
 DOWNLOAD = Path("winbuild/activate.4DX")
 PRESERVED = (CONTENTS / "CodeResources", CONTENTS / "QuickLook/Thumbnail.png")
 PACKAGE_FILES = (*FILES, WINDOWS, *PRESERVED)
-XCODE_DATA = Path("build/XCBuildData")
-DIRECTORIES = (Path("build/Activate.build"), BASE / "Activate.build")
+XCODE_DATA = BASE / "XCBuildData"
+DIRECTORIES = (BASE / "Activate.build",)
+EMPTY_DIRECTORIES = tuple(BASE / path for path in (
+    "ExplicitPrecompiledModules", "SwiftExplicitPrecompiledModules", "EagerLinkingTBDs/Default",
+))
+WINDOWS_FILES = tuple(WINDOWS.with_suffix(suffix) for suffix in (".4DX", ".exp", ".lib", ".pdb"))
+WINDOWS_DIRECTORIES = (Path("Objs/Release"),)
 
 
 def generated(path):
@@ -33,30 +37,74 @@ def generated(path):
         return False
     return (path in set(map(str, (*FILES, WINDOWS, DOWNLOAD)))
             or bool(re.fullmatch(
-                r"build/XCBuildData/(?:build\.db(?:-wal|-shm)?|"
+                r"test/Plugins/XCBuildData/(?:build\.db(?:-wal|-shm)?|"
                 r"[0-9a-f]{32}\.xcbuilddata/.+)", path))
             or any(path.startswith(str(directory) + "/") for directory in DIRECTORIES))
+
+
+def checked_mode(path):
+    status = path.lstat()
+    if stat.S_ISLNK(status.st_mode) or getattr(status, "st_file_attributes", 0) & 0x400:
+        raise ValueError(f"Refusing symlink/reparse output: {path}")
+    if not (stat.S_ISDIR(status.st_mode) or stat.S_ISREG(status.st_mode)):
+        raise ValueError(f"Refusing nonregular output: {path}")
+    return status.st_mode
+
+
+def no_git_marker(directory):
+    if any(entry.name.casefold() == ".git" for entry in directory.iterdir()):
+        raise ValueError(f"Refusing nested Git marker in output: {directory}")
+
+
+def validate_tree(path):
+    if path.name.casefold() == ".git":
+        raise ValueError(f"Refusing nested Git marker in output: {path}")
+    if stat.S_ISDIR(checked_mode(path)):
+        for descendant in path.iterdir():
+            validate_tree(descendant)
 
 
 def validate_paths(paths):
     root = Path.cwd().resolve()
     for path in map(Path, paths):
-        for parent in (path, *path.parents):
-            if parent == Path("."):
-                break
-            if is_link(parent):
-                raise ValueError(f"Refusing symlink/reparse output: {parent}")
-        if not path.resolve().is_relative_to(root):
+        relative = path.relative_to(root) if path.is_absolute() else path
+        if ".." in relative.parts:
             raise ValueError(f"Output escapes checkout: {path}")
-        if path.is_dir():
-            for descendant in path.rglob("*"):
-                if is_link(descendant):
-                    raise ValueError(f"Refusing symlink/reparse output: {descendant}")
+        current = Path(".")
+        for index, part in enumerate(relative.parts):
+            current /= part
+            if part.casefold() == ".git":
+                raise ValueError(f"Refusing nested Git marker in output: {current}")
+            try:
+                mode = checked_mode(current)
+            except FileNotFoundError:
+                break
+            if index < len(relative.parts) - 1:
+                if not stat.S_ISDIR(mode):
+                    raise ValueError(f"Output ancestor must be a regular directory: {current}")
+                no_git_marker(current)
+            else:
+                validate_tree(current)
+
+
+def validate_targets(files=(), directories=()):
+    validate_paths((*files, *directories))
+    for paths, predicate, kind in (
+        (files, stat.S_ISREG, "regular file"),
+        (directories, stat.S_ISDIR, "regular directory"),
+    ):
+        for path in paths:
+            try:
+                mode = checked_mode(path)
+            except FileNotFoundError:
+                continue
+            if not predicate(mode):
+                raise ValueError(f"Output target must be a {kind}: {path}")
 
 
 def prepare():
     files = (*FILES, WINDOWS)
-    validate_paths((*files, *DIRECTORIES, XCODE_DATA))
+    validate_targets(files, (*DIRECTORIES, XCODE_DATA, *EMPTY_DIRECTORIES))
     for path in files:
         path.unlink(missing_ok=True)
     for path in DIRECTORIES:
@@ -65,13 +113,12 @@ def prepare():
 
 
 def prepare_windows():
-    files = tuple(WINDOWS.with_suffix(suffix) for suffix in (".4DX", ".exp", ".lib", ".pdb"))
-    directory = Path("Objs/Release")
-    validate_paths((*files, directory))
-    for path in files:
+    validate_targets(WINDOWS_FILES, WINDOWS_DIRECTORIES)
+    for path in WINDOWS_FILES:
         path.unlink(missing_ok=True)
-    if directory.exists():
-        shutil.rmtree(directory)
+    for directory in WINDOWS_DIRECTORIES:
+        if directory.exists():
+            shutil.rmtree(directory)
 
 
 def require_file(path):
@@ -98,7 +145,8 @@ def verify_windows():
 
 
 def validate_unsigned():
-    validate_paths((*PACKAGE_FILES, DOWNLOAD, *DIRECTORIES, XCODE_DATA))
+    validate_targets((*PACKAGE_FILES, DOWNLOAD),
+                     (BUNDLE, *DIRECTORIES, XCODE_DATA, *EMPTY_DIRECTORIES))
     for path in (*FILES[:-1], *PRESERVED):
         require_file(path)
     source_version.verify_bundle(BUNDLE)
